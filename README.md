@@ -86,3 +86,6 @@ The system converts news text into numerical features using TF-IDF.
 Then Logistic Regression classifies the article as FAKE or REAL.
 
 It does not save user data anywhere.
+
+
+https://truthguard-fake-news-detection-1.onrender.com
