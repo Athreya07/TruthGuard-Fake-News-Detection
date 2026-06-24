@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthGuard - AI-Powered Fake News Detection</title>
+    <meta name="description" content="An enterprise-grade machine learning application to analyze text credibility, detect disinformation, and verify news integrity using natural language processing.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">TG</div>
+                <span class="logo-text">TruthGuard</span>
+                <span class="nav-badge">v1.0.0</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#features">Core Features</a>
+                <a href="#model-details">Model Metrics</a>
+                <a href="#detector-section" class="nav-cta">Launch Analyzer</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-tag">
+                    <span class="hero-tag-dot"></span>
+                    <span>98.94% Accuracy ML Classifier</span>
+                </div>
+                <h1>AI-Powered Fake News Detection</h1>
+                <p class="hero-subtitle">
+                    Empower your newsroom, research, or feed verification with advanced NLP. Instantly extract textual features and evaluate credibility using our regularized Logistic Regression classifier.
+                </p>
+                <div class="hero-actions">
+                    <a href="#detector-section" id="cta-btn" class="btn-primary">
+                        Analyze News
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                    <a href="#features" class="btn-secondary">Learn More</a>
+                </div>
+
+                <!-- Hero UI Mockup Illustration -->
+                <div class="hero-mockup">
+                    <div class="mockup-header">
+                        <span class="mockup-dot"></span>
+                        <span class="mockup-dot"></span>
+                        <span class="mockup-dot"></span>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="mockup-text-skeleton">
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line medium"></div>
+                            <div class="skeleton-line half"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                        </div>
+                        <div class="mockup-analysis-skeleton">
+                            <div class="mockup-badge"></div>
+                            <div class="mockup-circle-skeleton"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detector Workspace -->
+        <section class="detector-section" id="detector-section">
+            <div class="container">
+                <div class="dashboard-card">
+                    
+                    <!-- Dynamic Loading Overlay -->
+                    <div id="loading-screen" class="loading-overlay hidden">
+                        <div class="loading-spinner-wrapper">
+                            <div class="spinner-outer"></div>
+                            <div class="spinner-inner"></div>
+                        </div>
+                        <p class="loading-text">Analyzing Credibility</p>
+                        <p id="loading-message" class="loading-subtext">Initializing ML Classifier...</p>
+                    </div>
+
+                    <div class="dashboard-header">
+                        <div class="dashboard-title-area">
+                            <h2>Submit News Article</h2>
+                            <p>Paste the full text or headline of the news below for analysis</p>
+                        </div>
+                        <span class="nav-badge">No Login Required</span>
+                    </div>
+
+                    <div class="dashboard-body">
+                        <form id="analysis-form" method="POST" action="/predict">
+                            <div class="text-input-container">
+                                <textarea id="news-input" name="news_text" placeholder="Paste news article, headline, or text here (minimum 20 characters)..." required>{{ news_text or "" }}</textarea>
+                            </div>
+                            
+                            <div class="input-footer">
+                                <div class="counter-container">
+                                    <div class="counter-item">
+                                        <span>Characters:</span>
+                                        <span id="char-count" class="number">0</span>
+                                    </div>
+                                    <div class="counter-item">
+                                        <span>Words:</span>
+                                        <span id="word-count" class="number">0</span>
+                                    </div>
+                                </div>
+                                <button type="submit" id="submit-btn" class="btn-primary">
+                                    Verify Authenticity
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 2 11 13 2 9 22 2 22 22 11 13"></polyline></svg>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Error Message section -->
+                        {% if error %}
+                            <div id="error-section" class="alert-error">
+                                <svg class="alert-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                <span>{{ error }}</span>
+                            </div>
+                        {% endif %}
+
+                        <!-- Result Section -->
+                        {% if result %}
+                            <div id="results-section" class="results-section">
+                                <div class="results-grid">
+                                    
+                                    <!-- Result Card -->
+                                    <div class="result-status-card {{ 'state-fake' if result.prediction == 'FAKE' else 'state-real' }}">
+                                        <div class="result-badge-row">
+                                            {% if result.prediction == 'REAL' %}
+                                                <span class="status-badge">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                    Verified Source
+                                                </span>
+                                            {% else %}
+                                                <span class="status-badge">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                                    Suspect Disinformation
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="result-title-row">
+                                            <h3>AI Classification</h3>
+                                            <h2>{{ result.prediction }}</h2>
+                                        </div>
+
+                                        <p class="result-description">
+                                            {% if result.prediction == 'REAL' %}
+                                                This article exhibits features strongly aligned with objective reporting standards. Text structure, vocabulary choice, and syntax patterns reflect patterns observed in validated mainstream media articles.
+                                            {% else %}
+                                                This text shows linguistic markers typically found in fabricated articles, high-bias narratives, or unverified claims. The vocabulary density and word associations score poorly on factuality metrics.
+                                            {% endif %}
+                                        </p>
+
+                                        <!-- Fact-check / trust indicators card -->
+                                        <div class="guidelines-box">
+                                            {% if result.prediction == 'REAL' %}
+                                                <h4>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                                    Trust Indicators Present
+                                                </h4>
+                                                <p>Verified articles usually detail sources, contain neutral language, feature cross-referenced events, and show clear attribution of quotes and evidence.</p>
+                                            {% else %}
+                                                <h4>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                                    Fact-Check Recommendation
+                                                </h4>
+                                                <p>We recommend cross-referencing this headline or text with reliable news organizations or checking databases like Snopes, PolitiFact, or FactCheck.org.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Visual Analytics Card -->
+                                    <div class="result-analytics-card {{ 'state-fake' if result.prediction == 'FAKE' else 'state-real' }}">
+                                        <div class="analytics-header">
+                                            <h3>Linguistic Analysis</h3>
+                                            <p>Model output metrics and class breakdown</p>
+                                        </div>
+
+                                        <div class="confidence-meter-container">
+                                            <div class="confidence-percentage-display">
+                                                <h4>{{ result.confidence }}%</h4>
+                                                <span>Confidence</span>
+                                            </div>
+                                            <div class="confidence-bar-wrapper">
+                                                <div class="confidence-bar-info">
+                                                    <span>Verdict Certainty</span>
+                                                    <span>{{ result.confidence }}%</span>
+                                                </div>
+                                                <div class="confidence-bar-track">
+                                                    <div class="confidence-bar-fill" style="width: {{ result.confidence }}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Probability breakdown meters -->
+                                        <div class="probability-breakdown">
+                                            <h4>Model Class Probability</h4>
+                                            
+                                            <div class="prob-bars-stack">
+                                                <div class="prob-row">
+                                                    <div class="prob-label-row">
+                                                        <span>Real News Probability</span>
+                                                        <strong>{{ result.real_probability }}%</strong>
+                                                    </div>
+                                                    <div class="prob-track">
+                                                        <div class="prob-fill real" style="width: {{ result.real_probability }}%"></div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="prob-row">
+                                                    <div class="prob-label-row">
+                                                        <span>Fake News Probability</span>
+                                                        <strong>{{ result.fake_probability }}%</strong>
+                                                    </div>
+                                                    <div class="prob-track">
+                                                        <div class="prob-fill fake" style="width: {{ result.fake_probability }}%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Features Section -->
+        <section class="features-section" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <span class="tag">Architecture</span>
+                    <h2>Advanced Detection Engine</h2>
+                    <p>Understanding how TruthGuard processes raw inputs into deterministic integrity scores.</p>
+                </div>
+
+                <div class="features-grid">
+                    
+                    <!-- Feature 1 -->
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        </div>
+                        <h3>Machine Learning Based Detection</h3>
+                        <p>Leverages a trained Logistic Regression classifier optimized with L2 regularization to balance high accuracy with generalization capability.</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+                        </div>
+                        <h3>TF-IDF Feature Extraction</h3>
+                        <p>Constructs vectors of Term Frequency-Inverse Document Frequency using unigrams and bigrams, picking up on stylistic markers and content cues.</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="22"></line><line x1="8" y1="22" x2="16" y2="22"></line></svg>
+                        </div>
+                        <h3>Natural Language Processing</h3>
+                        <p>Applies standard text cleaning routines, eliminates high-frequency English stop words, and processes raw content systematically.</p>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        </div>
+                        <h3>Real-Time Analysis</h3>
+                        <p>Operates entirely in-memory to classify paragraphs and headlines instantly, presenting direct probability metrics within milliseconds.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- About Model Section -->
+        <section class="model-section" id="model-details">
+            <div class="container">
+                <div class="model-grid">
+                    
+                    <div class="model-info-content">
+                        <h2>Model Specifications</h2>
+                        <p class="model-desc">
+                            TruthGuard Lite runs on a pipeline combining supervised vectorization and linear classification. It is trained on the ISOT Fake and Real news collection to distinguish between highly structured true news wires and untrustworthy blogs/memes.
+                        </p>
+                        
+                        <div class="model-metric-cards">
+                            <div class="metric-card">
+                                <div class="metric-val">98.94%</div>
+                                <div class="metric-label">Validation Accuracy</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-val">39,103</div>
+                                <div class="metric-label">Training Records</div>
+                            </div>
+                        </div>
+
+                        <ul class="model-stats-list">
+                            <li>
+                                <span class="list-check-icon">✓</span>
+                                <span>High Precision (99.16%) minimizing false accusations.</span>
+                            </li>
+                            <li>
+                                <span class="list-check-icon">✓</span>
+                                <span>Balanced Stratification to prevent demographic class bias.</span>
+                            </li>
+                            <li>
+                                <span class="list-check-icon">✓</span>
+                                <span>Robust L2 Penalty (C=2.0) to regularize vector weight sparsity.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Details Panel -->
+                    <div class="model-details-panel">
+                        <h3>Classifier Metadata</h3>
+                        
+                        <div class="detail-row">
+                            <span class="label">Model Name</span>
+                            <span class="value">TruthGuard Lite Core</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Algorithm Used</span>
+                            <span class="value">Logistic Regression</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Dataset Info</span>
+                            <span class="value">ISOT Combined News Corpus</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Accuracy</span>
+                            <span class="value">98.94%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Feature Engineering</span>
+                            <span class="value">TF-IDF Vectorizer (50k Max)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">N-gram Range</span>
+                            <span class="value">Unigrams & Bigrams (1, 2)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Classification Output</span>
+                            <span class="value">Probabilistic Sigmoid Activation</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <div class="footer-logo-icon">TG</div>
+                <span class="footer-logo-text">TruthGuard</span>
+            </div>
+            <p class="footer-copyright">
+                &copy; 2026 TruthGuard. Built for recruiters, portfolio validation, and academic review.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
